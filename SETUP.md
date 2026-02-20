@@ -88,7 +88,13 @@ claude
 
 ## Step 5 (Optional) — Schedule Heartbeat Checks
 
-The heartbeat script runs periodic checks (disk space, service health, etc.) and logs results to your daily memory file. Customize `scripts/heartbeat.ps1` or `scripts/heartbeat.sh` with your own checks before scheduling.
+> **Skip this if you're just getting started.** It's optional and most users won't need it.
+
+The heartbeat script logs system checks (disk space, service health, etc.) to your daily memory file. The next time you start a Claude Code session, the agent reads those notes automatically.
+
+**This is not background AI.** It's a plain shell script that writes to markdown. Claude Code doesn't run in the background — it's interactive. The equivalent of a "heartbeat" in Claude Code is simply opening a session and saying `"daily briefing"`.
+
+Only set this up if you want automated system monitoring notes passively logged to your memory. Customize the checks in `scripts/heartbeat.sh` / `scripts/heartbeat.ps1` before scheduling.
 
 ### Windows — Task Scheduler
 
@@ -169,10 +175,9 @@ openclaw-lite/
 │       └── meeting-processing/  ← "meeting prep" / "meeting notes"
 │
 └── scripts/
-    ├── new-day.sh / .ps1        ← Create today's memory file
-    ├── heartbeat.sh / .ps1      ← Periodic checks
+    ├── heartbeat.sh / .ps1      ← Optional system health check logger
     ├── heartbeat-task.xml       ← Windows Task Scheduler template
-    └── session-recap.sh / .ps1  ← Preview session context
+    └── session-recap.sh / .ps1  ← Preview what context Claude loads
 ```
 
 ---

@@ -118,15 +118,39 @@ Skills are invoked by trigger phrases. The agent reads a skill's `SKILL.md` only
 
 ## Scripts
 
-Every script has both a shell (`.sh`) and PowerShell (`.ps1`) version.
+Every script has both a shell (`.sh`) and PowerShell (`.ps1`) version. All scripts are optional.
 
 | Script | Purpose |
 |--------|---------|
-| `setup.sh` / `setup.ps1` | Optional setup wizard |
-| `scripts/new-day.sh` / `.ps1` | Create today's memory file |
-| `scripts/heartbeat.sh` / `.ps1` | Periodic checks (disk, services) — run via cron/Task Scheduler |
-| `scripts/session-recap.sh` / `.ps1` | Preview what context Claude loads — useful for debugging |
-| `scripts/heartbeat-task.xml` | Windows Task Scheduler template for heartbeat |
+| `setup.sh` / `setup.ps1` | Interactive setup wizard (optional — you can just edit markdown directly) |
+| `scripts/heartbeat.sh` / `.ps1` | System health check logger — see below |
+| `scripts/session-recap.sh` / `.ps1` | Preview what context Claude loads at session start — useful for debugging |
+| `scripts/heartbeat-task.xml` | Windows Task Scheduler template for the heartbeat script |
+
+### About the Heartbeat Script
+
+**Important:** The heartbeat script is not a background AI. It's a simple shell script that logs system checks (disk space, service health, etc.) to your daily memory file. The next time you open a Claude Code session, the agent reads those notes as part of its normal context load.
+
+There is no persistent process, no background Claude running, no automatic session triggering. Claude Code is an interactive tool — you start it, do work, close it.
+
+> **The real "heartbeat" in Claude Code is starting your day with: `"daily briefing"`**
+
+The script is useful if you want automated system monitoring notes in your memory — but it's completely optional. Most users won't need it.
+
+**To schedule it (if you want it):**
+
+macOS/Linux (cron):
+```bash
+crontab -e
+# Every 30 min during work hours:
+*/30 8-20 * * 1-5 /path/to/openclaw-lite/scripts/heartbeat.sh >> /tmp/openclaw-heartbeat.log 2>&1
+```
+
+Windows (Task Scheduler):
+```powershell
+# Edit WorkingDirectory in heartbeat-task.xml first, then:
+Register-ScheduledTask -Xml (Get-Content scripts\heartbeat-task.xml | Out-String) -TaskName "openclaw-heartbeat"
+```
 
 ---
 
@@ -169,10 +193,9 @@ openclaw-lite/
 │       └── meeting-processing/
 │
 └── scripts/
-    ├── new-day.sh / .ps1
-    ├── heartbeat.sh / .ps1
+    ├── heartbeat.sh / .ps1      ← Optional system health check logger
     ├── heartbeat-task.xml       ← Windows Task Scheduler template
-    └── session-recap.sh / .ps1
+    └── session-recap.sh / .ps1  ← Debug: preview session context
 ```
 
 ---
