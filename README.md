@@ -20,18 +20,21 @@ This repo gives you that system — portable, auditable, version-controllable, a
 
 ## Quick Start
 
+**→ See [SETUP.md](SETUP.md) for full setup instructions (Windows + macOS/Linux)**
+
 ```bash
 # 1. Clone
-git clone https://github.com/YOUR_USERNAME/openclaw-lite.git
+git clone https://github.com/SubmitCode/openclaw-lite.git
 cd openclaw-lite
 
 # 2. Set up your API key
-cp .env.example .env
-# Edit .env and add your ANTHROPIC_API_KEY
+cp .env.example .env          # macOS/Linux
+# Copy-Item .env.example .env  # Windows PowerShell
+# Add your ANTHROPIC_API_KEY to .env
 
 # 3. Run setup (personalizes your workspace files)
-chmod +x setup.sh scripts/*.sh
-./setup.sh
+./setup.sh          # macOS/Linux
+# .\setup.ps1       # Windows PowerShell
 
 # 4. Start Claude Code — CLAUDE.md loads automatically
 claude
@@ -85,14 +88,20 @@ Files survive session restarts. "Mental notes" don't.
 
 ## Periodic Checks (Heartbeat)
 
-Run `scripts/heartbeat.sh` on a schedule to get proactive monitoring:
+Run the heartbeat script on a schedule for proactive monitoring (disk space, service health, etc.):
 
+**macOS/Linux (cron):**
 ```bash
-# Example: run every 30 minutes during work hours
 */30 8-20 * * 1-5 /path/to/openclaw-lite/scripts/heartbeat.sh >> /tmp/heartbeat.log 2>&1
 ```
 
-Customize the checks in `scripts/heartbeat.sh` — disk space, service health, git status, etc.
+**Windows (Task Scheduler):**
+```powershell
+# Import the pre-built task (edit WorkingDirectory in the XML first):
+Register-ScheduledTask -Xml (Get-Content scripts\heartbeat-task.xml | Out-String) -TaskName "openclaw-heartbeat"
+```
+
+Customize the checks in `scripts/heartbeat.sh` / `scripts/heartbeat.ps1`.
 
 ---
 

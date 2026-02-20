@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-16"?>
+<!--
+  Windows Task Scheduler definition for openclaw-lite heartbeat.
+  Edit AUTHOR and WORKING_DIRECTORY before importing.
+
+  To import:
+    Register-ScheduledTask -Xml (Get-Content scripts\heartbeat-task.xml | Out-String) -TaskName "openclaw-heartbeat"
+
+  To remove:
+    Unregister-ScheduledTask -TaskName "openclaw-heartbeat" -Confirm:$false
+-->
+<Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
+  <RegistrationInfo>
+    <Description>openclaw-lite heartbeat — runs periodic checks every 30 min during work hours</Description>
+    <Author>YOURUSERNAME</Author>
+  </RegistrationInfo>
+  <Triggers>
+    <CalendarTrigger>
+      <StartBoundary>2024-01-01T08:00:00</StartBoundary>
+      <Enabled>true</Enabled>
+      <ScheduleByDay>
+        <DaysInterval>1</DaysInterval>
+      </ScheduleByDay>
+      <Repetition>
+        <Interval>PT30M</Interval>
+        <Duration>PT12H</Duration>
+        <StopAtDurationEnd>false</StopAtDurationEnd>
+      </Repetition>
+    </CalendarTrigger>
+  </Triggers>
+  <Settings>
+    <MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy>
+    <DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries>
+    <StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>
+    <ExecutionTimeLimit>PT5M</ExecutionTimeLimit>
+    <Enabled>true</Enabled>
+    <RunOnlyIfIdle>false</RunOnlyIfIdle>
+  </Settings>
+  <Actions>
+    <Exec>
+      <Command>powershell.exe</Command>
+      <Arguments>-ExecutionPolicy Bypass -NonInteractive -File "scripts\heartbeat.ps1" >> "%TEMP%\openclaw-heartbeat.log" 2>&amp;1</Arguments>
+      <!-- EDIT THIS: replace with your actual path to openclaw-lite -->
+      <WorkingDirectory>C:\Users\YOURUSERNAME\openclaw-lite</WorkingDirectory>
+    </Exec>
+  </Actions>
+</Task>
