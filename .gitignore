@@ -1,0 +1,29 @@
+# Secrets — never commit
+.env
+*.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Logs
+*.log
+/tmp/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# If you want memory to be private (recommended for corporate use):
+# workspace/memory/
+# workspace/MEMORY.md
