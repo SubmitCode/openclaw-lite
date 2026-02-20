@@ -111,14 +111,6 @@ $now = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
 }
 "@ | Set-Content -Path $stateFile -Encoding UTF8
 
-# Create .env from example if it doesn't exist
-$envExample = Join-Path $PSScriptRoot ".env.example"
-$envFile    = Join-Path $PSScriptRoot ".env"
-if ((Test-Path $envExample) -and -not (Test-Path $envFile)) {
-    Copy-Item $envExample $envFile
-    Write-Host "  📄 Created .env from .env.example — add your ANTHROPIC_API_KEY" -ForegroundColor Yellow
-}
-
 Write-Host ""
 Write-Host "✅ Setup complete!" -ForegroundColor Green
 Write-Host ""
@@ -127,7 +119,6 @@ Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Cyan
 Write-Host "  1. Edit workspace\SOUL.md to shape the agent's personality"
 Write-Host "  2. Edit workspace\TOOLS.md with your environment specifics"
-Write-Host "  3. Edit .env and add your ANTHROPIC_API_KEY"
-Write-Host "  4. Run: claude   (in this directory — CLAUDE.md loads automatically)"
-Write-Host "  5. Optional: schedule scripts\heartbeat.ps1 via Task Scheduler"
+Write-Host "  3. Run: claude   (in this directory — CLAUDE.md loads automatically)"
+Write-Host "  4. Optional: schedule scripts\heartbeat.ps1 via Task Scheduler"
 Write-Host ""

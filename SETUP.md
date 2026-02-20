@@ -8,11 +8,12 @@ Step-by-step instructions for getting openclaw-lite running on Windows, macOS, o
 
 | Tool | Required | Install |
 |------|----------|---------|
-| [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) | ✅ Yes | `npm install -g @anthropic-ai/claude-code` |
+| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | ✅ Yes | `npm install -g @anthropic-ai/claude-code` |
 | Git | ✅ Yes | [git-scm.com](https://git-scm.com/) |
 | Node.js (v18+) | ✅ Yes (for Claude Code) | [nodejs.org](https://nodejs.org/) |
 | Python 3 | Optional | Only needed for heartbeat state tracking |
-| Anthropic API key | ✅ Yes | [console.anthropic.com](https://console.anthropic.com/) |
+
+> **No API key setup needed.** Claude Code manages its own authentication via `claude auth login`. Just install it, log in once, and you're ready.
 
 ---
 
@@ -25,52 +26,37 @@ cd openclaw-lite
 
 ---
 
-## Step 2 — Add Your API Key
+## Step 2 — Authenticate Claude Code (first time only)
 
-Copy the example env file and add your key:
-
-**Windows (PowerShell):**
-```powershell
-Copy-Item .env.example .env
-notepad .env
-```
-
-**macOS / Linux:**
 ```bash
-cp .env.example .env
-nano .env   # or: code .env
+claude auth login
 ```
 
-Edit `.env`:
-```
-ANTHROPIC_API_KEY=sk-ant-your-key-here
-```
-
-Set the environment variable in your session:
-
-**Windows (PowerShell):**
-```powershell
-$env:ANTHROPIC_API_KEY = "sk-ant-your-key-here"
-# To persist permanently:
-[System.Environment]::SetEnvironmentVariable("ANTHROPIC_API_KEY", "sk-ant-your-key-here", "User")
-```
-
-**macOS / Linux:**
-```bash
-export ANTHROPIC_API_KEY="sk-ant-your-key-here"
-# To persist: add the above line to ~/.bashrc or ~/.zshrc
-```
+Follow the prompts. You only need to do this once — Claude Code stores credentials for subsequent sessions.
 
 ---
 
-## Step 3 — Run Setup
+## Step 3 — Personalize Your Workspace
 
-The setup wizard personalizes your workspace files (USER.md, IDENTITY.md, etc.).
+You have two options:
+
+### Option A — Just edit the files (recommended for most users)
+
+Open `workspace/USER.md` and fill in your details — name, role, timezone, goals. That's the most important file. Then browse the other files in `workspace/` and customize as needed:
+
+- `workspace/SOUL.md` — agent personality and tone
+- `workspace/TOOLS.md` — your environment specifics (paths, tools)
+- `workspace/GOALS.md` — your longer-horizon goals
+- `workspace/RECURRING.md` — your recurring routines
+
+### Option B — Interactive setup wizard
+
+The setup scripts ask questions and write the files for you:
 
 **Windows (PowerShell):**
 ```powershell
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned   # one-time
-powershell -ExecutionPolicy Bypass -File setup.ps1
+.\setup.ps1
 ```
 
 **macOS / Linux:**
@@ -79,25 +65,9 @@ chmod +x setup.sh scripts/*.sh
 ./setup.sh
 ```
 
-Fill in your name, role, timezone, goals, etc. You can re-run this anytime or edit the files directly in `workspace/`.
-
 ---
 
-## Step 4 — Personalize Your Workspace
-
-After setup, review and customize these files to your liking:
-
-| File | What to do |
-|------|-----------|
-| `workspace/SOUL.md` | Adjust the agent's personality and tone |
-| `workspace/USER.md` | Add more context about yourself |
-| `workspace/TOOLS.md` | Add your environment specifics (paths, tools, aliases) |
-| `workspace/GOALS.md` | Fill in your goals |
-| `workspace/RECURRING.md` | Set up your recurring routines |
-
----
-
-## Step 5 — Start Claude Code
+## Step 4 — Start Claude Code
 
 From the `openclaw-lite` directory:
 
@@ -105,18 +75,20 @@ From the `openclaw-lite` directory:
 claude
 ```
 
-That's it. Claude Code automatically reads `CLAUDE.md` on every session start — no extra config needed. The agent will load your workspace context and be ready to help.
+`CLAUDE.md` is automatically read by Claude Code at session start — no extra config. The agent loads your workspace context and is ready to help.
 
 **First things to try:**
-- `"daily briefing"` — morning context load
+- `"daily briefing"` — morning context load and priority setting
 - `"add to inbox: [something]"` — quick capture
-- `"clarify: [fuzzy idea]"` — intention clarifier
+- `"clarify: [fuzzy idea]"` — turn a vague thought into a clear goal
+- `"end of day"` — close loops and set up tomorrow
+- `"weekly review"` — strategic audit and planning
 
 ---
 
-## Step 6 (Optional) — Schedule Heartbeat Checks
+## Step 5 (Optional) — Schedule Heartbeat Checks
 
-The heartbeat script runs periodic checks (disk space, service health, etc.) and logs them to your daily memory file. Customize `scripts/heartbeat.ps1` or `scripts/heartbeat.sh` with your own checks.
+The heartbeat script runs periodic checks (disk space, service health, etc.) and logs results to your daily memory file. Customize `scripts/heartbeat.ps1` or `scripts/heartbeat.sh` with your own checks before scheduling.
 
 ### Windows — Task Scheduler
 
@@ -129,7 +101,7 @@ The heartbeat script runs periodic checks (disk space, service health, etc.) and
    ```powershell
    Register-ScheduledTask -Xml (Get-Content scripts\heartbeat-task.xml | Out-String) -TaskName "openclaw-heartbeat"
    ```
-3. Verify: open Task Scheduler → find `openclaw-heartbeat`
+3. Verify: open Task Scheduler and find `openclaw-heartbeat`
 
 **Option B: Manual Task Scheduler UI**
 
@@ -152,7 +124,7 @@ Unregister-ScheduledTask -TaskName "openclaw-heartbeat" -Confirm:$false
 # Edit your crontab
 crontab -e
 
-# Add this line (runs every 30 min, 8am-8pm, weekdays):
+# Add this line (every 30 min, 8am-8pm, weekdays):
 */30 8-20 * * 1-5 /path/to/openclaw-lite/scripts/heartbeat.sh >> /tmp/openclaw-heartbeat.log 2>&1
 ```
 
@@ -162,47 +134,45 @@ crontab -e
 
 ```
 openclaw-lite/
-├── CLAUDE.md                  ← Auto-loaded by Claude Code (the core bootstrap)
-├── SETUP.md                   ← This file
-├── setup.sh / setup.ps1       ← Interactive setup wizard
-├── .env                       ← Your API keys (gitignored)
-├── .env.example               ← Template
+├── CLAUDE.md                    ← Auto-loaded by Claude Code (the core bootstrap)
+├── SETUP.md                     ← This file
+├── setup.sh / setup.ps1         ← Optional setup wizard
 │
 ├── workspace/
-│   ├── SOUL.md                ← Agent personality
-│   ├── IDENTITY.md            ← Agent name & emoji
-│   ├── USER.md                ← About you
-│   ├── TOOLS.md               ← Your environment specifics
-│   ├── MEMORY.md              ← Long-term curated memory
-│   ├── GOALS.md               ← Longer-horizon goals
-│   ├── INBOX.md               ← Universal capture inbox
-│   ├── WAITING_FOR.md         ← Delegated & pending items
-│   ├── DECISIONS.md           ← Decision log
-│   ├── SOMEDAY.md             ← Ideas & backlog
-│   ├── RECURRING.md           ← Recurring tasks & rhythms
-│   ├── DASHBOARD.md           ← Morning status snapshot
+│   ├── SOUL.md                  ← Agent personality
+│   ├── IDENTITY.md              ← Agent name & emoji
+│   ├── USER.md                  ← About you ← edit this first
+│   ├── TOOLS.md                 ← Your environment specifics
+│   ├── MEMORY.md                ← Long-term memory
+│   ├── INBOX.md                 ← Universal capture inbox
+│   ├── WAITING_FOR.md           ← Delegated & pending items
+│   ├── DECISIONS.md             ← Decision log
+│   ├── DASHBOARD.md             ← Morning status snapshot
+│   ├── GOALS.md                 ← Longer-horizon goals
+│   ├── SOMEDAY.md               ← Ideas & backlog
+│   ├── RECURRING.md             ← Recurring tasks & rhythms
 │   ├── memory/
-│   │   ├── YYYY-MM-DD.md      ← Daily session notes
+│   │   ├── YYYY-MM-DD.md        ← Daily session notes
 │   │   └── heartbeat-state.json
 │   ├── projects/
-│   │   ├── INDEX.md           ← Fast-scan project overview
-│   │   ├── _TEMPLATE.md       ← New project template
-│   │   ├── active/            ← One file per active project
-│   │   ├── planning/          ← Pre-kickoff projects
-│   │   └── archive/           ← Completed projects
+│   │   ├── INDEX.md             ← Fast-scan project overview
+│   │   ├── _TEMPLATE.md         ← New project template
+│   │   ├── active/              ← One file per active project
+│   │   ├── planning/            ← Pre-kickoff projects
+│   │   └── archive/             ← Completed projects
 │   └── skills/
-│       ├── daily-briefing/    ← Morning briefing workflow
-│       ├── end-of-day/        ← EOD reconciliation
-│       ├── weekly-review/     ← Strategic weekly audit
-│       ├── quick-capture/     ← Fast inbox capture
-│       ├── intention-clarifier/ ← Fuzzy idea → clear goal
-│       └── meeting-processing/  ← Pre/post meeting
+│       ├── daily-briefing/      ← "daily briefing"
+│       ├── end-of-day/          ← "end of day" / "wrap up"
+│       ├── weekly-review/       ← "weekly review"
+│       ├── quick-capture/       ← "capture" / "add to inbox"
+│       ├── intention-clarifier/ ← "clarify"
+│       └── meeting-processing/  ← "meeting prep" / "meeting notes"
 │
 └── scripts/
-    ├── new-day.sh / .ps1      ← Create today's memory file
-    ├── heartbeat.sh / .ps1    ← Periodic checks
-    ├── heartbeat-task.xml     ← Windows Task Scheduler template
-    └── session-recap.sh / .ps1 ← Preview session context
+    ├── new-day.sh / .ps1        ← Create today's memory file
+    ├── heartbeat.sh / .ps1      ← Periodic checks
+    ├── heartbeat-task.xml       ← Windows Task Scheduler template
+    └── session-recap.sh / .ps1  ← Preview session context
 ```
 
 ---
@@ -213,20 +183,16 @@ openclaw-lite/
 → Install Claude Code: `npm install -g @anthropic-ai/claude-code`
 → Make sure Node.js is installed and `npm` is in your PATH
 
-**API key not working**
-→ Check the key at [console.anthropic.com](https://console.anthropic.com/)
-→ Make sure `ANTHROPIC_API_KEY` is set in your environment (not just in `.env`)
+**Agent doesn't seem to have context**
+→ Make sure you're running `claude` from the `openclaw-lite` folder (where `CLAUDE.md` lives)
+→ Run `scripts/session-recap.ps1` (Windows) or `scripts/session-recap.sh` (macOS/Linux) to preview what's loaded
 
 **PowerShell execution policy error**
 → Run: `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`
 
-**Agent doesn't seem to have context**
-→ Make sure you're running `claude` from the `openclaw-lite` directory (where `CLAUDE.md` lives)
-→ Run `scripts/session-recap.ps1` (or `.sh`) to preview what context is loaded
-
 **Memory files not updating**
-→ Ask the agent explicitly: "log this to today's memory" or "remember: ..."
-→ End sessions with "end of day" to trigger the reconciliation skill
+→ Ask explicitly: `"remember: ..."` or `"log this to today's memory"`
+→ End sessions with `"end of day"` to trigger the reconciliation skill
 
 ---
 
@@ -236,6 +202,6 @@ openclaw-lite/
 git pull origin main
 ```
 
-Your `workspace/` files are yours — git won't overwrite them as long as you don't modify tracked template files.
+Your `workspace/` files are yours — updates won't overwrite them as long as you haven't modified tracked template files directly.
 
-> **Tip:** Add your `workspace/memory/` and `workspace/MEMORY.md` to `.gitignore` if you're in a shared or corporate repo environment — memory files contain personal context.
+> **Tip for corporate/shared repos:** Add `workspace/memory/` and `workspace/MEMORY.md` to `.gitignore` — memory files contain personal context you probably don't want committed.
